@@ -151,38 +151,7 @@
 
 
         /* ---------Create dropdown list -------------------- */
-        function openGroupWindow() {
-            var div = '<div id="' + 1 + '" class="ui-widget-content draggable" rel="0">' +
-                '<div class="header">' +
-                '<div  style="float:right;">' +
-                '<img id="imgAdd"  style="cursor:pointer;" src="/Images/delete.png"/>' +
-                '<img id="imgDelete"  style="cursor:pointer;" src="/Images/delete.png"/>' +
-                '</div>' +
-
-                '<span class="selText" rel="0">' + "HelloWorld" + '</span>' +
-                '</div>' +
-                '<div id="divMessage" class="messageArea">' +
-
-                '</div>' +
-                '<div class="buttonBar">' +
-                '<input id="txtPrivateMessage" class="msgText" type="text"   />' +
-                '<input id="btnSendMessage" class="submitButton button" type="button" value="Send"   />' +
-                '</div>' +
-                '</div>';
-
-            var $div = $(div);
-
-            // DELETE BUTTON IMAGE
-            $div.find('#imgDelete').click(function () {
-                $('#' + 1).remove();
-            });
-
-            $div.find('#imgAdd').click(function () {
-
-            });
-
-            AddDivToContainer($div);
-        }
+      
 
 
 
@@ -246,8 +215,32 @@
 
                 AddMessage(userName, message);
             }
+            ////////////
+
+            chatHub.client.sendGroupMessage = function (fromUserName, message) {
+
+                var ctrId = 'group_' + 1;
+
+                /*
+                if ($('#' + ctrId).length == 0) {
+
+                    createPrivateChatWindow(chatHub, windowId, ctrId, fromUserName);
+
+                }
+                */
+                $('#' + 1).find('#divMessage').append('<div class="message"><span class="userName">' + fromUserName + '</span>: ' + message + '</div>');
+
+                // set scrollbar
+                var height = $('#' + ctrId).find('#divMessage')[0].scrollHeight;
+                $('#' + ctrId).find('#divMessage').scrollTop(height);
+
+            }
 
 
+
+                ////
+                //
+            ////
             chatHub.client.sendPrivateMessage = function (windowId, fromUserName, message) {
 
                 var ctrId = 'private_' + windowId;
@@ -314,6 +307,54 @@
             createPrivateChatWindow(chatHub, id, ctrId, userName);
 
         }
+        function openGroupWindow(chatHub) {
+            var div = '<div id="' + 1 + '" class="ui-widget-content draggable" rel="0">' +
+                '<div class="header">' +
+                '<div  style="float:right;">' +
+                '<img id="imgAdd"  style="cursor:pointer;" src="/Images/delete.png"/>' +
+                '<img id="imgDelete"  style="cursor:pointer;" src="/Images/delete.png"/>' +
+                '</div>' +
+
+                '<span class="selText" rel="0">' + "HelloWorld" + '</span>' +
+                '</div>' +
+                '<div id="divMessage" class="messageArea">' +
+
+                '</div>' +
+                '<div class="buttonBar">' +
+                '<input id="txtPrivateMessage" class="msgText" type="text"   />' +
+                '<input id="btnSendMessage" class="submitButton button" type="button" value="Send"   />' +
+                '</div>' +
+                '</div>';
+
+            var $div = $(div);
+
+            // DELETE BUTTON IMAGE
+            $div.find('#imgDelete').click(function () {
+                $('#' + 1).remove();
+            });
+
+            // Send Button event
+            $div.find("#btnSendMessage").click(function () {
+
+                $textBox = $div.find("#txtPrivateMessage");
+                var msg = $textBox.val();
+                if (msg.length > 0) {
+
+                    $.connection.chatHub.server.sendGroupMessage(msg);
+                    $textBox.val('');
+                }
+            });
+
+            // Text Box event
+            $div.find("#txtPrivateMessage").keypress(function (e) {
+                if (e.which == 13) {
+                    $div.find("#btnSendMessage").click();
+                }
+            });
+
+            AddDivToContainer($div);
+        }
+
 
         function createPrivateChatWindow(chatHub, userId, ctrId, userName) {
 
@@ -348,7 +389,7 @@
                 var msg = $textBox.val();
                 if (msg.length > 0) {
 
-                    chatHub.server.sendPrivateMessage(userId, msg);
+                    chatHub.server.sendPrivateMessage(userId,msg);
                     $textBox.val('');
                 }
             });

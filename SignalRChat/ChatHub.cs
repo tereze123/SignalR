@@ -55,24 +55,12 @@ namespace SignalRChat
            
         }
 
-        public void SendGroupMessage(List<string> userId, string message)
+        public void SendGroupMessage(string message)
         {
             string fromUserId = Context.ConnectionId;
+            var fromUser = ConnectedUsers.FirstOrDefault(x => x.ConnectionId == fromUserId);
+            Clients.Group("Testa grup").sendGroupMessage(fromUser.UserName, message);
 
-            foreach (var toUser in userId)
-            {
-                var toUser1 = ConnectedUsers.FirstOrDefault(x => x.ConnectionId == toUser);
-                var fromUser = ConnectedUsers.FirstOrDefault(x => x.ConnectionId == fromUserId);
-
-                if (toUser != null && fromUser != null)
-                {
-                    // send to 
-                    Clients.Client(toUser).sendPrivateMessage(fromUserId, fromUser.UserName, message);
-
-                    // send to caller user
-                    Clients.Caller.sendPrivateMessage(toUser, fromUser.UserName, message);
-                }
-            }
         }
 
         public void SendPrivateMessage(string toUserId, string message)
